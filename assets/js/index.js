@@ -173,18 +173,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 new Sortable(TasksWrapper, {
                     group: 'tasks',
                     animation: 150,
-                    onEnd: function (evt) {
-                        console.log(evt)
-                        const order = Array.from(evt.to.children).map((task, index) => ({
-                            id: task.getAttribute('data-task-id'),
-                            order: index,
-                            column_id: evt.to.closest('.task-wrapper').getAttribute('data-column-id')
-                        }));
-                        fetchData(_apiLink + '/update_task_order', {
-                            tasks: order
-                        }).then(res => console.log(res));
+                onEnd: function (evt) {
+                    const columns = document.querySelectorAll('.task-wrapper');
+                    const tasks = [];
+
+                    columns.forEach(column => {
+                        const columnId = column.getAttribute('data-column-id');
+                        const taskItems = column.querySelectorAll('.task-item');
+
+                        taskItems.forEach((task, index) => {
+                            tasks.push({
+                                id: task.getAttribute('data-task-id'),
+                                order: index,
+                                column_id: columnId
+                            });
+                        });
+                    });
+
+                    console.log(tasks); // Bütün tapşırıqların sifarişini yoxlamaq
+
+                    fetchData(_apiLink + '/update_task_order', {
+                        tasks: tasks
+                    }).then(res => {
+                        console.log(res);
                         checkEmptyState();
-                    }
+                    }).catch(error => console.error(error));
+                }
+
                 });
             });
 
